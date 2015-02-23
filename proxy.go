@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"path"
 	"strings"
@@ -96,12 +98,15 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(res.StatusCode)
 	copyHeader(w.Header(), res.Header)
 
-	filtered, err := filterBytes(body, matches)
-	if err != nil {
-		panic(err)
+	if res.StatusCode < 300 {
+		var err error
+		body, err = filterBytes(body, matches)
+		if err != nil {
+			panic(err)
+		}
 	}
 
-	w.Write(filtered)
+	w.Write(body)
 }
 
 func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response, error) {
@@ -114,11 +119,13 @@ func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response,
 	*outreq = *r // includes shallow copies of maps, but okay
 
 	outreq.URL = p.UpstreamURL.ResolveReference(r.URL)
+	outreq.Host = p.UpstreamURL.Host
+
 	outreq.Proto = "HTTP/1.1"
 	outreq.ProtoMajor = 1
 	outreq.ProtoMinor = 1
 	outreq.Close = false
-	outreq.SetBasicAuth("", apiKey)
+	outreq.SetBasicAuth(apiKey, "")
 
 	// Remove hop-by-hop headers to the backend.  Especially
 	// important is "Connection" because we want a persistent
@@ -136,6 +143,10 @@ func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response,
 			outreq.Header.Del(h)
 		}
 	}
+
+	rc, _ := httputil.DumpRequest(outreq, false)
+	log.Println(outreq.URL.String())
+	log.Println(string(rc))
 
 	if clientIP, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
 		// If we aren't the first proxy retain prior
@@ -158,16 +169,18 @@ func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response,
 		return nil, nil, err
 	}
 
+	log.Printf("Response body: %s", body)
+
 	return body, res, nil
 }
 
 func (p *Proxy) authenticate(r *http.Request) (*Key, error) {
-	_, pass, ok := r.BasicAuth()
+	user, _, ok := r.BasicAuth()
 	if !ok {
 		return nil, errors.New("Unable to parse Authorization header")
 	}
 
-	key, err := p.KeyOpener([]byte(pass))
+	key, err := p.KeyOpener([]byte(user))
 	if err != nil {
 		return nil, errors.New("Invalid password provided")
 	}

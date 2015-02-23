@@ -126,7 +126,7 @@ func TestProxy(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		req.SetBasicAuth("", string(keyBytes))
+		req.SetBasicAuth(string(keyBytes), "")
 		req.Header.Set("Content-Type", "application/json")
 
 		res, err := http.DefaultClient.Do(req)

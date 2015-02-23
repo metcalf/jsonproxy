@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/binary"
+	"errors"
 	"time"
 )
 
@@ -64,12 +65,21 @@ func (a *Auth) Generate(key *Key) ([]byte, error) {
 		return nil, err
 	}
 
-	nonce := make([]byte, aead.NonceSize())
-	if _, err := rand.Read(nonce); err != nil {
-		return nil, err
+	for i := 0; i < 100; i++ {
+		nonce := make([]byte, aead.NonceSize())
+		if _, err := rand.Read(nonce); err != nil {
+			return nil, err
+		}
+
+		// Avoid ciphertexts that contain the ':' character since
+		// it's used as the delimiter in HTTP basic auth.
+		ciphertext := aead.Seal(nonce, nonce, buf.Bytes(), nil)
+		if !bytes.Contains(ciphertext, []byte(":")) {
+			return ciphertext, nil
+		}
 	}
 
-	return aead.Seal(nonce, nonce, buf.Bytes(), nil), nil
+	return nil, errors.New("Failed to generate a valid ciphertext")
 }
 
 // Open decrpyts a key encrypted using the same secret
@@ -79,7 +89,12 @@ func (a *Auth) Open(ciphertext []byte) (*Key, error) {
 		return nil, err
 	}
 
-	data, err := aead.Open(nil, ciphertext[:aead.NonceSize()], ciphertext[aead.NonceSize():], nil)
+	ns := aead.NonceSize()
+	if len(ciphertext) <= ns {
+		return nil, errors.New("Provided key data is invalid")
+	}
+
+	data, err := aead.Open(nil, ciphertext[:ns], ciphertext[ns:], nil)
 	if err != nil {
 		return nil, err
 	}

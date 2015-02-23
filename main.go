@@ -154,7 +154,7 @@ func build(spec *Specification) (http.Handler, func() error, error) {
 
 	api := API{
 		KeyGen:     auth.Generate,
-		KeyEncoder: base64.URLEncoding.EncodeToString,
+		KeyEncoder: base64.StdEncoding.EncodeToString,
 		Roles:      roles,
 	}
 
