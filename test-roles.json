@@ -1,0 +1,23 @@
+{
+  "foo": {
+    "/candidates/*": {
+      "methods": ["GET"],
+      "response_keys": [
+        "id",
+        "jobs/**"
+      ]
+    },
+    "/candidates/*/*/42": {
+      "methods": ["GET", "POST"],
+      "response_keys": [
+        "name/first"
+      ]
+    }
+  },
+  "bar": {
+    "/foo": {
+      "methods": ["*"],
+      "response_keys": ["**"]
+    }
+  }
+}
