@@ -1,0 +1,50 @@
+{
+	"ImportPath": "github.com/metcalf/jsonproxy",
+	"GoVersion": "go1.4.2",
+	"Packages": [
+		"./..."
+	],
+	"Deps": [
+		{
+			"ImportPath": "github.com/codahale/hdrhistogram",
+			"Rev": "d007420bedfa90a5c8942987a3dd4b22ee5247ba"
+		},
+		{
+			"ImportPath": "github.com/codahale/http-handlers/debug",
+			"Rev": "59e1813ccbcf09ee6fd4061679785959c67c48d1"
+		},
+		{
+			"ImportPath": "github.com/codahale/http-handlers/logging",
+			"Rev": "59e1813ccbcf09ee6fd4061679785959c67c48d1"
+		},
+		{
+			"ImportPath": "github.com/codahale/http-handlers/metrics",
+			"Rev": "59e1813ccbcf09ee6fd4061679785959c67c48d1"
+		},
+		{
+			"ImportPath": "github.com/codahale/http-handlers/recovery",
+			"Rev": "59e1813ccbcf09ee6fd4061679785959c67c48d1"
+		},
+		{
+			"ImportPath": "github.com/codahale/http-handlers/service",
+			"Rev": "59e1813ccbcf09ee6fd4061679785959c67c48d1"
+		},
+		{
+			"ImportPath": "github.com/codahale/metrics",
+			"Rev": "8118f0dd54775fd6d901fd6d98c1579081d372c7"
+		},
+		{
+			"ImportPath": "github.com/kelseyhightower/envconfig",
+			"Comment": "v1.0.0-6-ge904934",
+			"Rev": "e9049346b6aae8e6ad500c5a4519ad029439d660"
+		},
+		{
+			"ImportPath": "github.com/stretchr/graceful",
+			"Rev": "33d203351af9e6b2e733a3f10d11ffb726d66f30"
+		},
+		{
+			"ImportPath": "github.com/stretchr/pat/stop",
+			"Rev": "f7fe051f2b9bcaca162b38de4f93c9a8457160b9"
+		}
+	]
+}
