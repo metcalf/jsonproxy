@@ -8,7 +8,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"net/url"
 	"path"
 	"strings"
@@ -144,10 +143,6 @@ func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response,
 		}
 	}
 
-	rc, _ := httputil.DumpRequest(outreq, false)
-	log.Println(outreq.URL.String())
-	log.Println(string(rc))
-
 	if clientIP, _, err := net.SplitHostPort(r.RemoteAddr); err == nil {
 		// If we aren't the first proxy retain prior
 		// X-Forwarded-For information as a comma+space
@@ -157,6 +152,8 @@ func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response,
 		}
 		outreq.Header.Set("X-Forwarded-For", clientIP)
 	}
+
+	log.Printf("Proxying request to %s (event=proxy_request)", outreq.URL.String())
 
 	res, err := transport.RoundTrip(outreq)
 	if err != nil {
@@ -169,7 +166,7 @@ func (p *Proxy) request(r *http.Request, apiKey string) ([]byte, *http.Response,
 		return nil, nil, err
 	}
 
-	log.Printf("Response body: %s", body)
+	log.Printf("Received %d response with %d bytes of data (event=proxy_response)", res.StatusCode, len(body))
 
 	return body, res, nil
 }

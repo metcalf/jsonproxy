@@ -11,6 +11,13 @@ use the "username" field of HTTP basic auth for all authentication.
 
 TODO
 
+# Useful commands
+
+```
+curl -i -H "Content-Type: application/json" -X POST 127.0.0.1:8080/jsonproxy/keys -d'{"roles":["analytics"],"api_key":"<your key>"}'
+echo "<returned key>" |  base64 --decode |  xargs -0 -I % curl "http://127.0.0.1:8080</your/api/path>" --user "%:"
+```
+
 # API
 
 jsonproxy has its own HTTP-over-JSON API. All of the API paths are prefixed
