@@ -81,6 +81,7 @@ func TestGenerateKey(t *testing.T) {
 
 func TestProxy(t *testing.T) {
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("foo", "bar")
 		w.Write([]byte(testResponseJSON))
 	}))
 	defer upstream.Close()
@@ -103,7 +104,7 @@ func TestProxy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	keyBytes, err := base64.URLEncoding.DecodeString(key)
+	keyBytes, err := base64.StdEncoding.DecodeString(key)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -152,6 +153,10 @@ func TestProxy(t *testing.T) {
 
 		if c.expect == "" {
 			continue
+		}
+
+		if res.Header.Get("foo") != "bar" {
+			t.Errorf("Expected header to be proxied but got: %#v", res.Header)
 		}
 
 		var expect, actual interface{}

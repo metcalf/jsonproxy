@@ -24,6 +24,7 @@ var hopHeaders = []string{
 	"Trailers",
 	"Transfer-Encoding",
 	"Upgrade",
+	"Content-Length",
 }
 
 // Proxy provides configuration for proxying an underlying HTTP-over-JSON API.
@@ -94,8 +95,8 @@ func (p *Proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		res.Header.Del(h)
 	}
 
-	w.WriteHeader(res.StatusCode)
 	copyHeader(w.Header(), res.Header)
+	w.WriteHeader(res.StatusCode)
 
 	if res.StatusCode < 300 {
 		var err error
